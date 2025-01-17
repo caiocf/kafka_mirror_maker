@@ -138,7 +138,6 @@ services:
   kafka-init-topics:
     image: confluentinc/cp-kafka:7.2.1
     volumes:
-      - ./data/message.json:/data/message.json
       - ./scripts:/scripts
     depends_on:
       - kafka-source
