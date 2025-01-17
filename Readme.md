@@ -67,8 +67,9 @@ O MirrorMaker 2, introduzido no Kafka 2.4, é baseado no framework **Kafka Conne
 
 O MirrorMaker é uma ferramenta essencial para sincronização e replicacão em ambientes distribuídos Kafka. O MirrorMaker 1 é adequado para casos simples e menos exigentes, enquanto o MirrorMaker 2 é mais poderoso, suportando funcionalidades avançadas como sincronização automática e tradução de offsets.
 Detalhe de implementação com docker-composer de ambas as versões:
-[mm1](mm1)
-[mm2](mm2)
+
+- [mm1](mm1)
+- [mm2](mm2)
 
 
 Referencias:
