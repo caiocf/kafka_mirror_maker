@@ -62,18 +62,20 @@ O MirrorMaker 2, introduzido no Kafka 2.4, é baseado no framework **Kafka Conne
 
 ---
 
-## **Cases de implementação**
 
+## **Casos de Implementação**
 
-O MirrorMaker é uma ferramenta essencial para sincronização e replicacão em ambientes distribuídos Kafka. O MirrorMaker 1 é adequado para casos simples e menos exigentes, enquanto o MirrorMaker 2 é mais poderoso, suportando funcionalidades avançadas como sincronização automática e tradução de offsets.
-Detalhe de implementação com docker-composer de ambas as versões:
+O MirrorMaker é uma ferramenta essencial para sincronização e replicação em ambientes distribuídos Kafka. O MirrorMaker 1 é adequado para casos simples e menos exigentes, enquanto o MirrorMaker 2 é mais poderoso, suportando funcionalidades avançadas como sincronização automática e tradução de offsets.
 
-- [mm1](mm1)
-- [mm2](mm2)
+Detalhes de implementação com Docker Compose de ambas as versões:
 
+- [MirrorMaker 1 (MM1)](mm1)
+- [MirrorMaker 2 (MM2)](mm2)
 
-Referencias:
-https://santannaf.medium.com/usando-schema-registry-com-kafka-e-spring-boot-3-2-4-4c00181fcd22
-https://learn.microsoft.com/pt-br/azure/event-hubs/event-hubs-kafka-mirror-maker-tutorial_
-https://docs.kafka-ui.provectus.io/configuration/configuration-wizard
-https://medium.com/dev-cave/mirroring-entre-datacenters-com-mirrormaker-parte-ii-55b37954de74
+---
+
+## **Referências**
+- [Usando Schema Registry com Kafka e Spring Boot](https://santannaf.medium.com/usando-schema-registry-com-kafka-e-spring-boot-3-2-4-4c00181fcd22)
+- [Tutorial Kafka MirrorMaker com Azure Event Hubs](https://learn.microsoft.com/pt-br/azure/event-hubs/event-hubs-kafka-mirror-maker-tutorial_)
+- [Configuração do Kafka UI](https://docs.kafka-ui.provectus.io/configuration/configuration-wizard)
+- [Mirroring entre datacenters com MirrorMaker](https://medium.com/dev-cave/mirroring-entre-datacenters-com-mirrormaker-parte-ii-55b37954de74)
