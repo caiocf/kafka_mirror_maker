@@ -1,0 +1,156 @@
+version: '3.8'
+services:
+  schema-registry-0:
+    image: confluentinc/cp-schema-registry:7.5.0
+    hostname: schema-registry-0
+    container_name: schema-registry-0
+    depends_on:
+      - kafka-source
+      - kafka-destination
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka-source-0:9092,PLAINTEXT://kafka-destination-1:9092"
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-0
+      SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "http"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+    ports:
+      - "18081:8081"
+    networks:
+      - rede_internal
+
+  # ------- CLUSTER ORIGEM-------------------------------------------------------------------------------------
+  zookeeper-0:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper-0
+    container_name: zookeeper-0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "12181:2181"
+    networks:
+      - rede_internal
+
+  kafka-source:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka-source-0
+    container_name: kafka-source-0
+    depends_on:
+      - zookeeper-0
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-0:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-source-0:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+    ports:
+      - "19092:9092"
+    networks:
+      - rede_internal
+      - rede_mckf_net
+
+  # ------- CLUSTER DESTINO-------------------------------------------------------------------------------------
+
+  zookeeper-1:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper-1
+    container_name: zookeeper-1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "22181:2181"
+    networks:
+      - rede_internal
+
+  kafka-destination:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka-destination-1
+    container_name: kafka-destination-1
+    depends_on:
+      - zookeeper-1
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-destination-1:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+    ports:
+      - "29092:9092"
+    networks:
+      - rede_internal
+      - rede_mckf_net
+
+
+# ------------ IU KAFKA ----------------------------------------------------------------
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    hostname: kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka-source
+      - kafka-destination
+      - schema-registry-0
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: kafka-source
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-source-0:9092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry-0:8081
+      KAFKA_CLUSTERS_1_NAME: kafka-destination
+      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: kafka-destination-1:9092
+      KAFKA_CLUSTERS_1_SCHEMAREGISTRY: http://schema-registry-0:8081
+      #KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first-connect
+      #KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-destination:8083
+      #DYNAMIC_CONFIG_ENABLED: 'true'
+    #volumes:
+    #  - ./config.yml:/etc/kafkaui/dynamic_config.yaml
+    networks:
+      - rede_mckf_net
+      - rede_internal
+
+ # MIRROR MAKER VERSAO 1 so monitora topicos apos sua inicializacao
+  mirrormaker1:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - kafka-source
+      - kafka-destination
+      - kafka-init-topics
+      - schema-registry-0
+      - kafka-ui
+    command: >
+      sh -c "echo -n 'aguardando 40 segundos' && sleep 40 &&
+      kafka-mirror-maker
+      --consumer.config /etc/kafka/consumer.properties
+      --producer.config /etc/kafka/producer.properties
+      --whitelist '.*'
+      --offset.commit.interval.ms 10000"
+    volumes:
+      - ./mirror-maker-1-config:/etc/kafka
+    networks:
+      - rede_internal
+
+#--------------- criar e publicar no topico do origemm
+
+  kafka-init-topics:
+    image: confluentinc/cp-kafka:7.2.1
+    volumes:
+      - ./data/message.json:/data/message.json
+      - ./scripts:/scripts
+    depends_on:
+      - kafka-source
+      - kafka-destination
+      - schema-registry-0
+    entrypoint: ["sh", "-c", "/scripts/init.sh"]
+    networks:
+      - rede_internal
+
+
+networks:
+  rede_mckf_net:
+    driver: bridge
+  rede_internal:
+    internal: true
