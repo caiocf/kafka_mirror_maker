@@ -25,6 +25,8 @@ docker-compose -f docker-compose.yaml up -d --build
     - Cria o tópico chamado `usuarios` no cluster de origem.
     - Registra o esquema Avro correspondente no Schema Registry.
 
+
+![visao_geral_mm1.png](assets/visao_geral_mm1.png)
 ---
 
 ## **Limitações do MirrorMaker 1**
