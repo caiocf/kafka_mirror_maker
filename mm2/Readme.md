@@ -1,0 +1,1 @@
+![replicacao_2_cluster_mm2.png](assets/replicacao_2_cluster_mm2.png)

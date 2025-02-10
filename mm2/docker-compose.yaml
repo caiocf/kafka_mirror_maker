@@ -1,0 +1,281 @@
+version: '3.8'
+
+services:
+  schema-registry-0:
+    image: confluentinc/cp-schema-registry:7.5.0
+    hostname: schema-registry-0
+    container_name: schema-registry-0
+    restart: on-failure
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://cluster1-kafka1:9092,PLAINTEXT://cluster1-kafka2:9092,PLAINTEXT://cluster1-kafka3:9092,PLAINTEXT://cluster2-kafka1:9092,PLAINTEXT://cluster2-kafka2:9092,PLAINTEXT://cluster2-kafka3:9092"
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-0
+      SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "http"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+    #ports:
+    #  - "18081:8081"
+    networks:
+      - rede_internal
+
+  # ZooKeeper para Cluster 1
+  zookeeper1:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper1
+    container_name: zookeeper1
+    #ports:
+    #  - 22181:22181
+    #  - 22888:22888
+    #  - 23888:23888
+    #volumes:
+    #  - ./zookeeperA/data:/data
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 22181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeperA:22888:23888
+    networks:
+      - rede_internal
+
+  # Kafka Broker para Cluster 1
+  cluster1-kafka1:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: cluster1-kafka1
+    container_name: cluster1-kafka1
+    depends_on:
+      - zookeeper1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,PLAINTEXT_HOST://:19092'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cluster1-kafka1:9092,PLAINTEXT_HOST://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_BROKER_RACK: docker
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+    networks:
+      - rede_internal
+
+  cluster1-kafka2:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: cluster1-kafka2
+    container_name: cluster1-kafka2
+    depends_on:
+      - zookeeper1
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,PLAINTEXT_HOST://:19093'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cluster1-kafka2:9092,PLAINTEXT_HOST://localhost:19093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_BROKER_RACK: docker
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+    #ports:
+    #  - '9092:9092'
+    #  - "19092:19092"
+    networks:
+      - rede_internal
+
+  cluster1-kafka3:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: cluster1-kafka3
+    container_name: cluster1-kafka3
+    depends_on:
+      - zookeeper1
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,PLAINTEXT_HOST://:19094'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cluster1-kafka3:9092,PLAINTEXT_HOST://localhost:19094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_BROKER_RACK: docker
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+    #ports:
+    #  - '9092:9092'
+    #  - "19092:19092"
+    networks:
+      - rede_internal
+
+  # ZooKeeper para Cluster 2
+  zookeeper2:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper2
+    container_name: zookeeper2
+    #ports:
+    #  - 32181:32181
+    #  - 32888:32888
+    #  - 33888:33888
+    #volumes:
+    #  - ./zookeeperB/data:/data
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper2:32888:33888
+    networks:
+      - rede_internal
+
+  # Kafka Broker para Cluster 2
+  cluster2-kafka1:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: cluster2-kafka1
+    container_name: cluster2-kafka1
+    depends_on:
+      - zookeeper2
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:32181
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,PLAINTEXT_HOST://:19095'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cluster2-kafka1:9092,PLAINTEXT_HOST://localhost:19095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_BROKER_RACK: docker
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+    #ports:
+    # - '9092:9092'
+    # - "19092:19092"
+    networks:
+      - rede_internal
+
+  cluster2-kafka2:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: cluster2-kafka2
+    container_name: cluster2-kafka2
+    depends_on:
+      - zookeeper2
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:32181
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,PLAINTEXT_HOST://:19096'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cluster2-kafka2:9092,PLAINTEXT_HOST://localhost:19096
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_BROKER_RACK: docker
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+    #ports:
+    #  - '9092:9092'
+    #  - "19092:19092"
+    networks:
+      - rede_internal
+
+  cluster2-kafka3:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: cluster2-kafka3
+    container_name: cluster2-kafka3
+    depends_on:
+      - zookeeper2
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:32181
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,PLAINTEXT_HOST://:19097'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://cluster2-kafka3:9092,PLAINTEXT_HOST://localhost:19097
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_BROKER_RACK: docker
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-0:8081
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+    #ports:
+    #  - '9092:9092'
+    #  - "19092:19092"
+    networks:
+      - rede_internal
+
+  # ------------ IU KAFKA ----------------------------------------------------------------
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    hostname: kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    depends_on:
+      - cluster1-kafka1
+      - cluster2-kafka1
+      - schema-registry-0
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: kafka-source
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: cluster1-kafka1:9092,cluster1-kafka2:9092,cluster1-kafka3:9092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry-0:8081
+      KAFKA_CLUSTERS_1_NAME: kafka-destination
+      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: cluster2-kafka1:9092,cluster2-kafka2:9092,cluster2-kafka3:9092
+      KAFKA_CLUSTERS_1_SCHEMAREGISTRY: http://schema-registry-0:8081
+      #DYNAMIC_CONFIG_ENABLED: 'true'
+    #volumes:
+    #  - ./config.yml:/etc/kafkaui/dynamic_config.yaml
+    networks:
+      - rede_internal
+      - rede_mckf_net
+
+  # Kafka MirrorMaker 2
+  mirrormaker2:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: mirror-maker
+    container_name: mirror-maker
+    depends_on:
+      - cluster1-kafka1
+      - cluster2-kafka1
+      - zookeeper1
+      - zookeeper2
+    command: >
+      bash -c "
+        /usr/bin/connect-mirror-maker /etc/kafka/mm2-config.properties
+      "
+    volumes:
+      - ./mirror-maker-2-config:/etc/kafka
+    environment:
+      KAFKA_BROKER_ID: 4
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181,zookeeper2:32181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:29096,PLAINTEXT_HOST://:9091
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://mirror-maker:29096,PLAINTEXT_HOST://localhost:9091
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+      KAFKA_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/kafka/connect-log4j.properties"
+    #ports:
+    #  - 9091:9091
+    #  - 29096:29096
+    networks:
+      - rede_internal
+
+  #--------------- criar e publicar no topico do origemm
+
+  kafka-init-topics:
+    image: confluentinc/cp-kafka:7.2.1
+    volumes:
+      - ./scripts:/scripts
+    depends_on:
+      - cluster1-kafka1
+      - cluster2-kafka1
+      - schema-registry-0
+      - mirrormaker2
+    entrypoint: ["sh", "-c", "/scripts/init.sh"]
+    networks:
+      - rede_internal
+
+
+networks:
+  rede_mckf_net:
+    driver: bridge
+  rede_internal:
+    internal: true
+
+
+

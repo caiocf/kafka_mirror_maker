@@ -37,6 +37,7 @@ O MirrorMaker 2, introduzido no Kafka 2.4, é baseado no framework **Kafka Conne
 - **Vantagens:**
     - Tradução automática de offsets entre clusters.
     - Sincronização automática de tópicos e configurações.
+    - Replicação Bidirecional
     - Melhor suporte para monitoramento e gerenciamento em escala.
     - Baseado em Kafka Connect, permitindo expansão para integrações mais complexas.
 - **Limitações:**
@@ -50,15 +51,17 @@ O MirrorMaker 2, introduzido no Kafka 2.4, é baseado no framework **Kafka Conne
 
 ## **Tabela Comparativa: MirrorMaker 1 vs MirrorMaker 2**
 
-| **Aspecto**                 | **MirrorMaker 1 (MM1)**                  | **MirrorMaker 2 (MM2)**                  |
-|-----------------------------|-------------------------------------------|-------------------------------------------|
-| **Arquitetura**             | Consumidor e produtor Kafka              | Baseado em Kafka Connect                 |
-| **Sincronização Automática** | Não suportado                          | Suportado                                |
-| **Tradução de Offsets**     | Não suportado                          | Suportado                                |
-| **Facilidade de Configuração** | Simples, mas manual                     | Requer mais configuração inicial        |
-| **Escalabilidade**          | Limitada                                | Alta, com suporte nativo a clusters      |
-| **Monitoramento**           | Limitado                                | Integrado com Kafka Connect              |
-| **Casos de Uso**            | Replicacão básica Kafka-Kafka            | Replicacão avançada com sincronização e offsets |
+| **Aspecto**                 | **MirrorMaker 1 (MM1)**      | **MirrorMaker 2 (MM2)**                         |
+|-----------------------------|------------------------------|-------------------------------------------------|
+| **Arquitetura**             | Consumidor e produtor Kafka  | Baseado em Kafka Connect                        |
+| **Sincronização Automática** | Não suportado                | Suportado                                       |
+| **Tradução de Offsets**     | Não suportado                | Suportado                                       |
+| **Facilidade de Configuração** | Simples, mas manual          | Requer mais configuração inicial                |
+| **Escalabilidade**          | Limitada                     | Alta, com suporte nativo a clusters             |
+| **Monitoramento**           | Limitado                     | Integrado com Kafka Connect                     |
+| **Replicação bidirecional**           | Não suportado                          | Suportado                                             |
+| **Baseado em Kafka Connect**           | Não suportado                          | Suportado                                             |
+| **Casos de Uso**            | Replicacão básica Kafka-Kafka | Replicacão avançada com sincronização e offsets |
 
 ---
 
